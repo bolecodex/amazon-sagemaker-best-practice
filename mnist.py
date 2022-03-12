@@ -31,6 +31,9 @@ def cnn_model_fn(features, labels, mode):
     # Input Layer
     # Reshape X to 4-D tensor: [batch_size, width, height, channels]
     # MNIST images are 28x28 pixels, and have one color channel
+    #If one component of shape is the special value -1, the size of that dimension is computed so that the total size remains constant. 
+    #In particular, a shape of [-1] flattens into 1-D. At most one component of shape can be -1.
+    # https://www.tensorflow.org/api_docs/python/tf/reshape
     input_layer = tf.reshape(features["x"], [-1, 28, 28, 1])
 
     # Convolutional Layer #1
