@@ -34,6 +34,10 @@ def cnn_model_fn(features, labels, mode):
     #If one component of shape is the special value -1, the size of that dimension is computed so that the total size remains constant. 
     #In particular, a shape of [-1] flattens into 1-D. At most one component of shape can be -1.
     # https://www.tensorflow.org/api_docs/python/tf/reshape
+
+    # MNIST数据集是一个训练集一共包含了 60,000 张图像和标签，而测试集一共包含了 10,000 张图像和标签的手写数字数据集。
+    # 每张图 28x28 pixels, 颜色为黑白。
+    # 利用 reshape 函数将数据转换成 4d张量. batch_size = -1,表示对全数据进行转换,width 和 height为28, channels为1表示黑白， 3为RGB彩色。
     input_layer = tf.reshape(features["x"], [-1, 28, 28, 1])
 
     # Convolutional Layer #1
@@ -41,6 +45,12 @@ def cnn_model_fn(features, labels, mode):
     # Padding is added to preserve width and height.
     # Input Tensor Shape: [batch_size, 28, 28, 1]
     # Output Tensor Shape: [batch_size, 28, 28, 32]
+
+    # 对 input_layer 进行卷积运算
+    # filters： 简单理解就是一个filter表示图像的一层， 32个filter就是有32层。
+    # kernel_size： 表示参与卷积运算的卷积核大小为 5 * 5的矩阵
+    # padding的方式为： same padding： 当filter的中心点与image的边角重合时，开始做卷积运算。
+                    # valid padding： 当filter的中心点与image的边角重合时，开始做卷积运算
     conv1 = tf.layers.conv2d(
         inputs=input_layer,
         filters=32,
@@ -52,6 +62,8 @@ def cnn_model_fn(features, labels, mode):
     # First max pooling layer with a 2x2 filter and stride of 2
     # Input Tensor Shape: [batch_size, 28, 28, 32]
     # Output Tensor Shape: [batch_size, 14, 14, 32]
+
+    # 将卷积输出的 feature map， 通过 2 * 2的pool_size，进行 max_pooling操作， 每次移动步长为2
     pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
 
     # Convolutional Layer #2
@@ -75,21 +87,26 @@ def cnn_model_fn(features, labels, mode):
     # Flatten tensor into a batch of vectors
     # Input Tensor Shape: [batch_size, 7, 7, 64]
     # Output Tensor Shape: [batch_size, 7 * 7 * 64]
+    
+    # 将卷积运算输出的结果从多维度转成一维
     pool2_flat = tf.reshape(pool2, [-1, 7 * 7 * 64])
 
     # Dense Layer
     # Densely connected layer with 1024 neurons
     # Input Tensor Shape: [batch_size, 7 * 7 * 64]
     # Output Tensor Shape: [batch_size, 1024]
+    # 设置全连接层信息， 输出神经元个数为 1024， 激励函数为 relu
     dense = tf.layers.dense(inputs=pool2_flat, units=1024, activation=tf.nn.relu)
 
     # Add dropout operation; 0.6 probability that element will be kept
+    # 添加dropout操作，为了防止过拟合。
     dropout = tf.layers.dropout(
         inputs=dense, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
 
     # Logits layer
     # Input Tensor Shape: [batch_size, 1024]
     # Output Tensor Shape: [batch_size, 10]
+    # 定义最后一层网络结构,输出的神经元个数为 10
     logits = tf.layers.dense(inputs=dropout, units=10)
 
     predictions = {
@@ -103,10 +120,12 @@ def cnn_model_fn(features, labels, mode):
       return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
     # Calculate Loss (for both TRAIN and EVAL modes)
+    # 定义损失函数为 sparse_softmax_cross_entropy
     loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
 
     # Configure the Training Op (for TRAIN mode)
-    if mode == tf.estimator.ModeKeys.TRAIN:
+    # 定义训练优化器 GradientDescent， 学习率为：  0.001
+    if mode == tf.estimator.ModeKeys.TRAIN: 
       optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
       train_op = optimizer.minimize(
           loss=loss,

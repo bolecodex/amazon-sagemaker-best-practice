@@ -20,17 +20,26 @@ import json
 
 def model(x_train, y_train, x_test, y_test):
     """Generate a simple model"""
+    # Sequential： 创建顺序模型, 此模型为最简单的线性、从头到尾的结构顺序，不分叉，是多个网络层的线性堆叠。 参数：数组中的内容为模型中的层次结构
     model = tf.keras.models.Sequential([
-        tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(1024, activation=tf.nn.relu),
-        tf.keras.layers.Dropout(0.4),
-        tf.keras.layers.Dense(10, activation=tf.nn.softmax)
+        tf.keras.layers.Flatten(),                                  # Flatten层用来将输入“压平”，即把多维的输入一维化处理
+        tf.keras.layers.Dense(1024, activation=tf.nn.relu),         # 该层网络有1024个神精元， 激励函数为： relu
+        tf.keras.layers.Dropout(0.4),                               # 利用Dropout函数防止过拟合，  表示将有多少神经元暂时从网络中丢弃
+        tf.keras.layers.Dense(10, activation=tf.nn.softmax)         # 该层网络有10个神精元， 激励函数为： softmax
     ])
 
+    # 对模型进行compile操作， 使用的优化器为 adam, 损失函数为： sparse_categorical_crossentropy， 监控指标为 accuracy
+    # adam 优化器： 是对SGD的扩展
+    # sparse_categorical_crossentropy 损失函数： categorical_crossentropy和sparse_categorical_crossentropy都是计算多分类crossentropy的，只是对y的格式要求不同。
+        # 1）如果是categorical_crossentropy，那y必须是one-hot处理过的
+        # 2）如果是sparse_categorical_crossentropy，那y就是原始的整数形式
     model.compile(optimizer='adam',
                   loss='sparse_categorical_crossentropy',
                   metrics=['accuracy'])
+    # 训练数据              
     model.fit(x_train, y_train)
+
+    # 验证数据
     model.evaluate(x_test, y_test)
 
     return model
@@ -67,12 +76,15 @@ def _parse_args():
 if __name__ == "__main__":
     args, unknown = _parse_args()
 
+    # 加载训练数据和测试数据
     train_data, train_labels = _load_training_data(args.train)
     eval_data, eval_labels = _load_testing_data(args.train)
 
+    # 创建模型
     mnist_classifier = model(train_data, train_labels, eval_data, eval_labels)
 
     if args.current_host == args.hosts[0]:
         # save model to an S3 directory with version number '00000001' in Tensorflow SavedModel Format
         # To export the model as h5 format use model.save('my_model.h5')
+        # 将模型进行导出， 默认格式为 h5 形式、
         mnist_classifier.save(os.path.join(args.sm_model_dir, '000000001'))
