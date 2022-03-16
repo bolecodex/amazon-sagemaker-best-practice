@@ -183,7 +183,10 @@ def _parse_args():
     return parser.parse_known_args()
 
 def serving_input_fn():
-    
+#     tf.estimator.export.ServingInputReceiver(features, receiver_tensors)
+#     服务输入函数的工作是将接收到的原始特征转换为模型函数接受的已处理特征。
+#     receiver_tensors：这些是输入占位符。这将在您的图表中打开，您将在其中接收原始输入特征。
+#     定义此占位符后，您可以对这些接收器张量执行转换，以将它们转换为模型可接受的特征。
     inputs = {'x': tf.placeholder(tf.float32, [None, 784])}
     return tf.estimator.export.ServingInputReceiver(inputs, inputs)
 
