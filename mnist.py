@@ -108,14 +108,28 @@ def cnn_model_fn(features, labels, mode):
     # Output Tensor Shape: [batch_size, 10]
     # 定义最后一层网络结构,输出的神经元个数为 10
     logits = tf.layers.dense(inputs=dropout, units=10)
-
     predictions = {
         # Generate predictions (for PREDICT and EVAL mode)
         "classes": tf.argmax(input=logits, axis=1),
         # Add `softmax_tensor` to the graph. It is used for PREDICT and by the
-        # `logging_hook`.
+        # `logging_hook`. 
+        """
+        softmax 函数： softmax函数，又称归一化指数函数。是二分类函数sigmoid在多分类上的推广，目的是将多分类的结果以概率的形式展现出来。
+        概率有两个性质：1）预测的概率为非负数；2）各种预测结果概率之和等于1
+        详细参考PPT: https://docs.google.com/presentation/d/1tBDnnWs2KxzEombv1j3luhMRZ2Z1KihAhaaFq1Y8Y8A/edit?usp=sharing
+        """
+
         "probabilities": tf.nn.softmax(logits, name="softmax_tensor")
     }
+
+    # EstimatorSpec: 
+    """
+        EstimatorSpec一个class(类)，是定义在model_fn中的，并且model_fn返回的也是它的一个实例，这个实例是用来初始化Estimator类的.
+        根据mode的值的不同,需要不同的参数：
+        * 对于mode == ModeKeys.TRAIN：必填字段是loss和train_op.
+        * 对于mode == ModeKeys.EVAL：必填字段是loss.
+        * 对于mode == ModeKeys.PREDICT：必填字段是predictions.
+    """
     if mode == tf.estimator.ModeKeys.PREDICT:
       return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
@@ -125,6 +139,11 @@ def cnn_model_fn(features, labels, mode):
 
     # Configure the Training Op (for TRAIN mode)
     # 定义训练优化器 GradientDescent， 学习率为：  0.001
+    # global_step: 是一个Variable类型的参数，在所有的网络参数结束梯度更新后，global_step会自增加一。
+    #               使用global_step作为梯度更新次数控制整个训练过程何时停止，就相当于使用迭代次数（num of iterations）作为控制条件。
+    #               在一次迭代过程，就前向传播了一个batch，并计算之后更新了一次梯度。
+    # tf.train.get_global_step() 方法返回的是的 global_step作为name的tensor, 
+    #   如 <tf.Variable ‘global_step:0’ shape=() dtype=int64_ref>。 tensor参数与global_step = tf.Variable(0, name=“global_step”, trainable=False) 完全相同。
     if mode == tf.estimator.ModeKeys.TRAIN: 
       optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
       train_op = optimizer.minimize(
@@ -174,11 +193,32 @@ if __name__ == "__main__":
     eval_data, eval_labels = _load_testing_data(args.train)
 
     # Create the Estimator
+    """
+        Estimator: 是TensorFlow提供的高阶API Class，Estimator 会封装下列操作：训练，评估，预测，导出以供使用。
+        初始化函数：
+            __init__(self, model_fn, model_dir=None, config=None, params=None, warm_start_from=None)
+            参数：
+            model_fn: 模型函数。函数的格式如下：
+                参数：
+                    1、features: 这是 input_fn 返回的第一项（input_fn 是 train, evaluate 和 predict 的参数）。类型应该是单一的 Tensor 或者 dict。
+                    2、labels: 这是 input_fn 返回的第二项。类型应该是单一的 Tensor 或者 dict。如果 mode 为 ModeKeys.PREDICT，则会默认为 labels=None。如果 model_fn 不接受 mode，model_fn 应该仍然可以处理 labels=None。
+                    3、mode: 可选。指定是训练、验证还是测试。参见 ModeKeys。
+                    4、params: 可选，超参数的 dict。 可以从超参数调整中配置 Estimators。
+                    5、config: 可选，配置。如果没有传则为默认值。可以根据 num_ps_replicas 或 model_dir 等配置更新 model_fn。
+                返回：
+                    EstimatorSpec
+            model_dir: 保存模型参数、图等的地址，也可以用来将路径中的检查点加载至 estimator 中来继续训练之前保存的模型。如果是 PathLike， 那么路径就固定为它了。如果是 None，那么 config 中的 model_dir 会被使用（如果设置了的话），如果两个都设置了，那么必须相同；如果两个都是 None，则会使用临时目录。
+    """
     mnist_classifier = tf.estimator.Estimator(
         model_fn=cnn_model_fn, model_dir=args.model_dir)
 
     # Set up logging for predictions
     # Log the values in the "Softmax" tensor with label "probabilities"
+    
+    # LoggingTensorHook： 监视/记录张量， 用标签“probabilities”记录“Softmax”张量中的值
+    # tf.estimator.LoggingTensorHook(tensors, every_n_iter=None, every_n_secs=None, at_end=False, formatter=None)
+    # tensors： 参数类型dic 将字符串值标签映射到张量/张量名称或 iterable 的张量/张量名称的字典。
+    # every_n_iter： 参数类型int ，在当前worker上每N个局部步长打印一次 tensors 量值。
     tensors_to_log = {"probabilities": "softmax_tensor"}
     logging_hook = tf.train.LoggingTensorHook(
         tensors=tensors_to_log, every_n_iter=50)
@@ -198,9 +238,13 @@ if __name__ == "__main__":
         num_epochs=1,
         shuffle=False)
 
+    # 创建一个已经经过验证的TrainSpec实例.用来配置训练过程
+    # tf.estimator.TrainSpec函数返回一个经过验证的TrainSpec对象.
     train_spec = tf.estimator.TrainSpec(train_input_fn, max_steps=20000)
+    # 创建一个已经验证的EvalSpec实例. 用来配置评估过程、（可选）模型的导出。
+    # tf.estimator.EvalSpec函数返回一个经过验证的EvalSpec对象.
     eval_spec = tf.estimator.EvalSpec(eval_input_fn)
+    # 进行训练和评估
     tf.estimator.train_and_evaluate(mnist_classifier, train_spec, eval_spec)
-
     if args.current_host == args.hosts[0]:
         mnist_classifier.export_savedmodel(args.sm_model_dir, serving_input_fn)

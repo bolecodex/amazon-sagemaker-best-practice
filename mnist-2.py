@@ -23,16 +23,16 @@ def model(x_train, y_train, x_test, y_test):
     # Sequential： 创建顺序模型, 此模型为最简单的线性、从头到尾的结构顺序，不分叉，是多个网络层的线性堆叠。 参数：数组中的内容为模型中的层次结构
     model = tf.keras.models.Sequential([
         tf.keras.layers.Flatten(),                                  # Flatten层用来将输入“压平”，即把多维的输入一维化处理
-        tf.keras.layers.Dense(1024, activation=tf.nn.relu),         # 该层网络有1024个神精元， 激励函数为： relu
+        tf.keras.layers.Dense(1024, activation=tf.nn.relu),         # 该层网络有1024个神经元， 激励函数为： relu
         tf.keras.layers.Dropout(0.4),                               # 利用Dropout函数防止过拟合，  表示将有多少神经元暂时从网络中丢弃
-        tf.keras.layers.Dense(10, activation=tf.nn.softmax)         # 该层网络有10个神精元， 激励函数为： softmax
+        tf.keras.layers.Dense(10, activation=tf.nn.softmax)         # 该层网络有10个神经元， 激励函数为： softmax
     ])
 
     # 对模型进行compile操作， 使用的优化器为 adam, 损失函数为： sparse_categorical_crossentropy， 监控指标为 accuracy
-    # adam 优化器： 是对SGD的扩展
+    # adam 优化器： 是对SGD的扩展, 实现简单，计算高效，对内存需求少.自动调整学习率,很适合应用于大规模的数据及参数的场景.适用于梯度稀疏或梯度存在很大噪声的问题
     # sparse_categorical_crossentropy 损失函数： categorical_crossentropy和sparse_categorical_crossentropy都是计算多分类crossentropy的，只是对y的格式要求不同。
         # 1）如果是categorical_crossentropy，那y必须是one-hot处理过的
-        # 2）如果是sparse_categorical_crossentropy，那y就是原始的整数形式
+        # 2）如果是sparse_categorical_crossentropy，那y就是原始的整数形式.
     model.compile(optimizer='adam',
                   loss='sparse_categorical_crossentropy',
                   metrics=['accuracy'])
