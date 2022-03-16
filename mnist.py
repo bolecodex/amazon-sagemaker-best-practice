@@ -183,6 +183,7 @@ def _parse_args():
     return parser.parse_known_args()
 
 def serving_input_fn():
+    
     inputs = {'x': tf.placeholder(tf.float32, [None, 784])}
     return tf.estimator.export.ServingInputReceiver(inputs, inputs)
 
@@ -248,3 +249,9 @@ if __name__ == "__main__":
     tf.estimator.train_and_evaluate(mnist_classifier, train_spec, eval_spec)
     if args.current_host == args.hosts[0]:
         mnist_classifier.export_savedmodel(args.sm_model_dir, serving_input_fn)
+        
+    # The tf.estimator.Estimator interface allows users to provide a model_fn which accepts features either within a single tensor or within a dictionary mapping strings to tensors.
+
+    # The Estimator export_savedmodel method requires a serving_input_receiver_fn argument, which is a function of no arguments that produces a ServingInputReceiver. The features tensors from this ServingInputReceiver are passed to the model_fn for serving.
+
+    # Upon instantiation, the ServingInputReceiver wraps single tensor features into a dictionary. This raises an error for estimators whose model_fn expects a single tensor as its features argument.
