@@ -142,8 +142,7 @@ def cnn_model_fn(features, labels, mode):
     # global_step: 是一个Variable类型的参数，在所有的网络参数结束梯度更新后，global_step会自增加一。
     #               使用global_step作为梯度更新次数控制整个训练过程何时停止，就相当于使用迭代次数（num of iterations）作为控制条件。
     #               在一次迭代过程，就前向传播了一个batch，并计算之后更新了一次梯度。
-    # tf.train.get_global_step() 方法返回的是的 global_step作为name的tensor, 
-    #   如 <tf.Variable ‘global_step:0’ shape=() dtype=int64_ref>。 tensor参数与global_step = tf.Variable(0, name=“global_step”, trainable=False) 完全相同。
+    # tf.train.get_global_step() 方法返回的是的 global_step作为name的tensor, 默认初始值为0.
     if mode == tf.estimator.ModeKeys.TRAIN: 
       optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
       train_op = optimizer.minimize(
@@ -174,6 +173,8 @@ def _parse_args():
 
     # Data, model, and output directories
     # model_dir is always passed in from SageMaker. By default this is a S3 path under the default bucket.
+
+    # 为脚本文件设置运行参数： --model_dir为必要参数,由用户指定。其它参数为可选参数,如果用户不指定， 默认从环境变量中获取。
     parser.add_argument('--model_dir', type=str)
     parser.add_argument('--sm-model-dir', type=str, default=os.environ.get('SM_MODEL_DIR'))
     parser.add_argument('--train', type=str, default=os.environ.get('SM_CHANNEL_TRAINING'))
