@@ -670,7 +670,7 @@ age,job,marital,education,default,housing,loan,contact,month,day_of_week,duratio
 52,admin.,single,unknown,unknown,yes,no,cellular,may,wed,147,1,999,0,nonexistent,-1.8,92.893,-46.2,1.334,5099.1,no
 25,admin.,single,high.school,unknown,no,no,cellular,jul,mon,252,1,999,0,nonexistent,1.4,93.918,-42.7,4.96,5228.1,no
 31,services,married,high.school,no,no,yes,telephone,jun,fri,108,2,999,0,nonexistent,1.4,94.465,-41.8,4.967,5228.1,no
-58,retired,divorced,basic.9y,no,yes,no,telephone,nov,mon,248,1,999,0,nonexistent,-0.1,93.2,-42.0,4.4060000000000015,5195.8,yes
+58,retired,divorced,basic.9y,no,yes,no,telephone,nov,mon,248,1,999,0,nonexistent,-0.1,93.2,-42.0,4.406000000000001,5195.8,yes
 44,technician,married,basic.6y,unknown,yes,no,telephone,jun,tue,98,4,999,0,nonexistent,1.4,94.465,-41.8,4.961,5228.1,no
 32,admin.,single,university.degree,no,yes,no,cellular,sep,tue,157,2,999,0,nonexistent,-3.4,92.379,-29.8,0.8190000000000001,5017.5,no
 32,admin.,married,university.degree,no,yes,yes,cellular,aug,wed,224,1,999,0,nonexistent,1.4,93.444,-36.1,4.965,5228.1,no
@@ -23684,7 +23684,7 @@ age,job,marital,education,default,housing,loan,contact,month,day_of_week,duratio
 55,admin.,divorced,university.degree,no,yes,no,telephone,may,fri,412,1,999,0,nonexistent,1.1,93.994,-36.4,4.855,5191.0,no
 76,retired,married,university.degree,no,no,yes,cellular,mar,thu,167,9,999,0,nonexistent,-1.8,92.843,-50.0,1.757,5099.1,no
 32,admin.,divorced,high.school,no,unknown,unknown,cellular,jul,thu,81,4,999,0,nonexistent,1.4,93.918,-42.7,4.968,5228.1,no
-46,technician,married,professional.course,no,no,no,telephone,nov,mon,98,1,999,0,nonexistent,-0.1,93.2,-42.0,4.4060000000000015,5195.8,no
+46,technician,married,professional.course,no,no,no,telephone,nov,mon,98,1,999,0,nonexistent,-0.1,93.2,-42.0,4.406000000000001,5195.8,no
 50,management,married,university.degree,no,yes,no,cellular,aug,mon,308,4,999,0,nonexistent,1.4,93.444,-36.1,4.965,5228.1,no
 37,technician,married,university.degree,no,no,no,telephone,jun,thu,82,1,999,0,nonexistent,1.4,94.465,-41.8,4.8660000000000005,5228.1,no
 64,technician,married,professional.course,no,yes,no,cellular,apr,wed,250,1,999,0,nonexistent,-1.8,93.075,-47.1,1.445,5099.1,no
@@ -29389,7 +29389,7 @@ age,job,marital,education,default,housing,loan,contact,month,day_of_week,duratio
 28,student,single,high.school,no,yes,no,cellular,may,thu,21,8,999,0,nonexistent,-1.8,92.893,-46.2,1.266,5099.1,no
 49,technician,married,university.degree,no,yes,no,telephone,may,thu,420,2,999,0,nonexistent,1.1,93.994,-36.4,4.86,5191.0,no
 26,services,single,high.school,no,yes,no,cellular,jul,tue,98,1,999,0,nonexistent,-2.9,92.469,-33.6,1.044,5076.2,no
-33,technician,single,professional.course,no,yes,no,telephone,nov,mon,4918,1,999,0,nonexistent,-0.1,93.2,-42.0,4.4060000000000015,5195.8,no
+33,technician,single,professional.course,no,yes,no,telephone,nov,mon,4918,1,999,0,nonexistent,-0.1,93.2,-42.0,4.406000000000001,5195.8,no
 32,blue-collar,married,basic.4y,no,no,no,telephone,may,mon,41,2,999,0,nonexistent,1.1,93.994,-36.4,4.857,5191.0,no
 54,blue-collar,divorced,basic.4y,no,no,no,telephone,may,mon,208,1,999,0,nonexistent,1.1,93.994,-36.4,4.857,5191.0,no
 30,admin.,single,university.degree,no,no,no,cellular,aug,thu,165,2,999,0,nonexistent,1.4,93.444,-36.1,4.962,5228.1,no
