@@ -1,0 +1,252 @@
+{
+  "metadata": {
+    "version": 1,
+    "disable_limits": false
+  },
+  "nodes": [
+    {
+      "node_id": "a8cf3a87-2f7d-4d64-b90b-bb12cb29616b",
+      "type": "SOURCE",
+      "operator": "sagemaker.s3_source_0.1",
+      "parameters": {
+        "dataset_definition": {
+          "__typename": "S3CreateDatasetDefinitionOutput",
+          "datasetSourceType": "S3",
+          "name": "bank-additional-full.csv",
+          "description": null,
+          "s3ExecutionContext": {
+            "__typename": "S3ExecutionContext",
+            "s3Uri": "s3://sagemaker-studio-hyiup9hevyp/bank-additional/bank-additional-full.csv",
+            "s3ContentType": "csv",
+            "s3HasHeader": true,
+            "s3FieldDelimiter": ",",
+            "s3DirIncludesNested": false,
+            "s3AddsFilenameColumn": false
+          }
+        }
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "default"
+        }
+      ]
+    },
+    {
+      "node_id": "b41805d1-05b7-4c61-b1ed-01b83d373019",
+      "type": "TRANSFORM",
+      "operator": "sagemaker.spark.infer_and_cast_type_0.1",
+      "parameters": {},
+      "trained_parameters": {
+        "schema": {
+          "age": "long",
+          "job": "string",
+          "marital": "string",
+          "education": "string",
+          "default": "string",
+          "housing": "string",
+          "loan": "string",
+          "contact": "string",
+          "month": "string",
+          "day_of_week": "string",
+          "duration": "long",
+          "campaign": "long",
+          "pdays": "long",
+          "previous": "long",
+          "poutcome": "string",
+          "emp.var.rate": "string",
+          "cons.price.idx": "string",
+          "cons.conf.idx": "string",
+          "euribor3m": "float",
+          "nr.employed": "string",
+          "y": "string"
+        }
+      },
+      "inputs": [
+        {
+          "name": "default",
+          "node_id": "a8cf3a87-2f7d-4d64-b90b-bb12cb29616b",
+          "output_name": "default"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "default"
+        }
+      ]
+    },
+    {
+      "node_id": "28ba68e4-be16-449c-ba52-b84211a17933",
+      "type": "VISUALIZATION",
+      "operator": "sagemaker.visualizations.describe_0.1",
+      "parameters": {
+        "name": "Summary"
+      },
+      "inputs": [
+        {
+          "name": "df",
+          "node_id": "b41805d1-05b7-4c61-b1ed-01b83d373019",
+          "output_name": "default"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "default"
+        }
+      ]
+    },
+    {
+      "node_id": "b60e8399-ab3b-4eb6-874d-6630d128681a",
+      "type": "VISUALIZATION",
+      "operator": "sagemaker.visualizations.histogram_0.1",
+      "parameters": {
+        "name": "Age",
+        "x_axis": "age",
+        "color_by": "y"
+      },
+      "inputs": [
+        {
+          "name": "df",
+          "node_id": "b41805d1-05b7-4c61-b1ed-01b83d373019",
+          "output_name": "default"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "default"
+        }
+      ]
+    },
+    {
+      "node_id": "ec5f6481-79b1-46b9-b9e5-6591628d217a",
+      "type": "VISUALIZATION",
+      "operator": "sagemaker.visualizations.histogram_0.1",
+      "parameters": {
+        "name": "Job",
+        "x_axis": "job",
+        "color_by": "y"
+      },
+      "inputs": [
+        {
+          "name": "df",
+          "node_id": "b41805d1-05b7-4c61-b1ed-01b83d373019",
+          "output_name": "default"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "default"
+        }
+      ]
+    },
+    {
+      "node_id": "af49d926-cbac-4727-be03-9d8c6c96f849",
+      "type": "TRANSFORM",
+      "operator": "sagemaker.spark.custom_pandas_0.1",
+      "parameters": {
+        "code": "# Table is available as variable `df`\nimport time\nimport pandas as pd\n\n# Change the value . into _\ndf = df.replace(regex=r'\\.', value='_')\ndf = df.replace(regex=r'\\_$', value='')\n\n# Add two new indicators\ndf[\"no_previous_contact\"] = (df[\"pdays\"] == 999).astype(int)\ndf[\"not_working\"] = df[\"job\"].isin([\"student\", \"retired\", \"unemployed\"]).astype(int)\n\n# Add unique ID and event time for features store\ndf['FS_ID'] = df.index + 1000\ncurrent_time_sec = int(round(time.time()))\ndf['FS_time'] = pd.Series([current_time_sec]*len(df), dtype=\"float64\")"
+      },
+      "inputs": [
+        {
+          "name": "df",
+          "node_id": "b41805d1-05b7-4c61-b1ed-01b83d373019",
+          "output_name": "default"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "default"
+        }
+      ]
+    },
+    {
+      "node_id": "67dfed21-306b-4720-956f-379eefcf651b",
+      "type": "TRANSFORM",
+      "operator": "sagemaker.spark.manage_columns_0.1",
+      "parameters": {
+        "operator": "Drop column",
+        "drop_column_parameters": {
+          "column_to_drop": [
+            "duration",
+            "emp.var.rate",
+            "nr.employed",
+            "euribor3m",
+            "cons.price.idx",
+            "cons.conf.idx"
+          ]
+        }
+      },
+      "inputs": [
+        {
+          "name": "df",
+          "node_id": "af49d926-cbac-4727-be03-9d8c6c96f849",
+          "output_name": "default"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "default"
+        }
+      ]
+    },
+    {
+      "node_id": "e5608c25-9d20-4939-afec-19422a0ca6be",
+      "type": "TRANSFORM",
+      "operator": "sagemaker.spark.encode_categorical_0.1",
+      "parameters": {
+        "operator": "One-hot encode",
+        "one_hot_encode_parameters": {
+          "invalid_handling_strategy": "Keep",
+          "drop_last": false,
+          "output_style": "Columns",
+          "input_column": [
+            "job"
+          ],
+          "output_column": "job"
+        },
+        "ordinal_encode_parameters": {
+          "invalid_handling_strategy": "Replace with NaN"
+        }
+      },
+      "trained_parameters": {
+        "one_hot_encode_parameters": {
+          "_hash": -1767228197713558300,
+          "string_indexer_model": "P)h>@6aWAK2mk><bX0!8ZMNS4003bD000vJ003=ebYWy+bYU-WVRCdWFfcGMFm;bjPs1<_hVT50oV%!9N4xDhE;~#^0&%TO<7{R5nv)>L)c=lEBm@X<mi<1@D_=!#AV#qko(>WM^hcC20G*^YQX`~HC?66H?yz+V-;j1*p%H~hgT<J@2C=T1McX#@ysTDjTZoB&LW+ZTY_4S~%Nf{rH!GRTgW}~6Wp`U?jq}xVSuYxnFb{SIY`%)Yg`76tF!SP{`FI4U3~t>kn8|cP47~O^eFYQR(Dgiyg;1y=n{@w88K>?&DWu0sKn677Iiu?@cNqIWI*`cIuaf^i=(^9G7{{9rP)h>@6aWAK2mk><bX1*B9`OzU000aC000;O003=ebYWy+bYU+paA9(EEif=JFfcA-a$`#_N@ieSU}D&od!P;gP)h>@6aWAK2mk><bX59|7B=t!000#O002k;003lRbYU-WVRCdWFfcGMFfCy;He)q2H)bs}Ibt#`G%{i_EnzleF)d<dV>V+lG-Wh6VP!32FfcGKb8ca9aCt6pVRCVGWps^G&1%~~5MC?sPaBt>)<~d(5jZ4Z3%hbu+w_uK>7j(uL!p$i){g8YtCh36N-)9i(I+S+<URTdJ@py-2p!o<oBlyhJKy)s%+5E<o}IoLQ9{2s^sCdSE`|--@MCh+EY!KmuasM7JQIo#a$B3!@u+{gxgib)ZoT&S+lQ@sfN(Ag7$murOg}_uAz3Ps2&P(y4CqUdfGL%XDYk$Nlx-r?V1)+W#t<0|D-8+?{b*Yx(*a~FnXiFAKw_B}1~Mji*``o;QrX7Xf>#}@!KvfP=WVlM`ux2~mRLs}a^koLlFdPyQ?1#WI<!Gf_T7CcjNQpiklWdQmuS29Q|uAaaXjDi4_iKMdp*+d-rVoIExJqo1yHBsc0TTPZubsb&;GJz&&MYqwA^o*<`A#%y18D2Y{k$-xb+iWf;J+@q9`1OL*gF)kzp=mh`~hxHq`l5n1N-SS>}GOT?cl(f?yUHtBb@2{U8+}xd~=(uLH%hQo82_^<DmtI#$t@rPu$VmUjuYKsw2lWkQ*kg_OYzCxFdANQHpSCG3cPaAyJU+HBr!i2I^4ILLIj+DLa4j)vi=do(YE<lSL9<>@%$kf!s=B;`-jNgT&Kj^gQPGJX<8!*m?a`SjTHecX72Yd^ye@f}c00|XQR000O80YG$A<C@c25&!@I5C8xGO#lD@WMOn+FD`Ila&#>)FfcGMEnze^V>L53W-T*0Vlpi>GGZ|;VK!qiEn;S4He)h0Wi&WpWi4YcFfcB2Zeeh6c`k5aa&dKKbS`6ZV@obdW?*1oV(6)leNc0|#18;aO928D0~7!N00;m9Ky*}oz-_kQ0001C0RR9K00000000000001_fdBvi0BvP-VPs)+VJ~oDa&#>)FfcGMP)h*<6ay3h000O80YG$AolhR|4gdfE3;+NC7ytkO0000000000q=66t003=ebYWy+bYU+paA9(EEif=JFfcA-a$`_S0Rj{Q6aWAK2mk><bX59|7B=t!000#O002k;0000000000005+cQ~>}0WMOn+FK}UUbS*G2FfcGJVKg>lH8VG6Ei*Y{GA%SRVlgdYHe)d@VrFADV=^>lG&o^pEn_e+FfMa$VQ_GHE^uLTadl;MP)h*<6ay3h000O80YG$A<C@c25&!@I5C8xGO#lD@0000000000q=Bjf003lRbYU+paA9(EEif=JFfc7)G&W;3GdE@}GdW^1Ei^J>F)d*>V=*maW@9#EGBjm0IALWiV=yo<E^}^SaBz7paA9(Bb!BueV{&6qO9ci10000400aPd0RR9e1ONa400",
+          "one_hot_encoder_model": "P)h>@6aWAK2mk><bW{~6VU^SX003zL000vJ003=ebYWy+bYU-WVRCdWFfcGMFm;Z*Zo)tiMf-fl)MmA@i7nisNQo3gD%#b^9tSJ?((G&s5dY3Xln4r%DX#84XO1vfObL1j{G~ABuqTxw^0#tUO@xw})Yj8mkXJv1k$6*%g$iVLlmuOb{<&RtUE9>U(Rx|Ib-yD{bMS@SD6RAY-N7$(+2wgG;T_VvP^)pZYTCN1OQr15ZLpA!F#DKg9c<YMxoC!Pk%uh*vH8o*1wV3#AD9IC32mYZ_UK1T@BRnv)lAHR;Z&M5VYc#lBfG^u{?M4;-knW2KbD=I&QMDO1QY-O00;m9Ky*|ccSHsb0000C0000O0001OWprU=VRT_HE^uLTbS*G2FfcGKV{&6lE=p!#U|?dHny4WP08mQ<1QY-O00;m9Ky*}H2M1z)0RR9n0ssI=0001FVRT_HaA9(EEif=JFfc7;IXEydH8D3WV=_1~Ei`2@Wi2={VlXW;HZwF~W@a%nIW;*gV=yo<E^}^SaBz7paA9(Bb!BvYQcX)MF%(T>Uv;4i7a1}zixRLXjA7<Y9jC>G?nFdH-HAxrNqoc0%+w@Rsuuhi{y=|-x3-ERn84+JoOAEFA*TmtF+qfpPDn5~Ez$~Ta}6Ohw;tO362V#D$6%M>g2iZ-CD=bcT(u)%{$JbSKUoTb(GI3-L*e92Z6@c%gS61Tg?5^>sSE1>K=1~l%TmiyRt|aC5B#9B5<s&J)bg|M<ag2sm|zckPu_E*v$FS#RzHA!V9c!Y<YDB8l-A~ki;)14{9P}<lg1WxMgJr`;t`@-KM?j-b8v3Q(s5JY^HMsI3n%DH<B_?^NU}b&&WwkSg-jJv=a%&^A6X^JS?SvvfS5BrnZg(`f%Iavi+Q%FfFup%hjrydQQ4ER)~v6DwsIP>3L-Jk0ENLaWFMNK@pO7MMf7N)c)K+1#ft5i#}SX)n}czo^LC_qx#}jlRBDiAD&JLEnx=W0q`f%n{!Nldb<;uK+wy||UhuVn&?)?tH&9Ch1QY-O00;m9Ky*}avQ}&o0000G0000@0001FVRT_HE^uLTbS*G2FfcGJWjQ!7Ff}nZEn_k`F)cJ@F=Z_{F=8++Gd43cVP<AAGdVRmEn_e+FfMa$VQ_GHE^uLTadl;ME@N_IOD;-gU|?WkSZvY0=G;FkGXPLa0Rj{Q6aWAK2mk><bW{~6VU^SX003zL000vJ0000000000005+c00000ZDn*}WMOn+FK}UUbS*G2FfcGsO928D0~7!N00;m9Ky*|ccSHsb0000C0000O00000000000001_fdv5o0BvP-VPs)+VJ|LlVRCdWFfcGMFfL<qV^B*00u%!j0000800BUBR9y!LVtxSt05Ado07w7;00000000000HlFQ0RRAGVRT_HaA9(EEif=JFfc7;IXEydH8D3WV=_1~Ei`2@Wi2={VlXW;HZwF~W@a%nIW;*gV=yo<E^}^SaBz7paA9(Bb!Bu=O928D0~7!N00;m9Ky*}avQ}&o0000G0000@00000000000001_fh_|70AyiwVJ|LlVRCdWFfcGMFfC;{I503ZF*hw^GB`0UG-WYmEjTe^FfB7SGc;jlW-&84H90L~FfcGKb8ca9aCt6pVRCVGWpplMa$`_S1qJ{B000C41ORve0062300000"
+        }
+      },
+      "inputs": [
+        {
+          "name": "df",
+          "node_id": "67dfed21-306b-4720-956f-379eefcf651b",
+          "output_name": "default"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "default"
+        }
+      ]
+    },
+    {
+      "node_id": "e786c128-37bb-4075-9f12-ef1a61549a56",
+      "type": "TRANSFORM",
+      "operator": "sagemaker.spark.custom_pandas_0.1",
+      "parameters": {
+        "code": "# Table is available as variable `df`\nimport pandas as pd\ndf=pd.get_dummies(df)"
+      },
+      "inputs": [
+        {
+          "name": "df",
+          "node_id": "e5608c25-9d20-4939-afec-19422a0ca6be",
+          "output_name": "default"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "default"
+        }
+      ]
+    }
+  ]
+}
