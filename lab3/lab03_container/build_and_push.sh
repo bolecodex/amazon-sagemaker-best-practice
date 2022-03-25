@@ -40,6 +40,14 @@ fullname="${account}.dkr.ecr.${region}.amazonaws.com/${image}:latest"
 
 # If the repository doesn't exist in ECR, create it.
 # 检查ECR的repository中是否有对应的镜像信息
+"""
+/dev/null 代表空设备文件 
+> 代表重定向到哪里，例如：echo "123" > /home/123.txt 
+1 表示stdout标准输出，系统默认值是1，所以">/dev/null"等同于"1>/dev/null" 
+2 表示stderr标准错误 
+& 表示等同于的意思，2>&1，表示2的输出重定向等同于1 
+
+"""
 aws ecr describe-repositories --repository-names "${image}" > /dev/null 2>&1
 
 # 上一条命令返回值不等于-ne 0, 则执行下面的语句

@@ -26,7 +26,7 @@ class ScoringService(object):
 
     # 定义一个get_model类方法
     @classmethod
-    def get_model(cls):
+    def get_model(cls):   # new ScoringService().get_model()    ScoringService.get_model()
         """Get the model object for this instance, loading it if it's not already loaded."""
         # 判断model是否为None
         if cls.model == None:
